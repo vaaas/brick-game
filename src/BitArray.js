@@ -1,8 +1,8 @@
 export default class BitArray {
 	constructor(length) {
-		this.bits = new Uint8Array(BitArray.number_of_bytes_required(length))
-		for (let i = 0; i < this.bits.length; i++)
-			screen[i] = 0
+		this.bytes = new Uint8Array(BitArray.bytes_needed(length))
+		for (let i = 0; i < this.bytes.length; i++)
+			this.bytes[i] = 0
 		this.length = length
 	}
 
@@ -10,7 +10,7 @@ export default class BitArray {
 		let b = 0
 		let B = 0
 		while (b < this.length) {
-			const octet = this.bits[B]
+			const octet = this.bytes[B]
 			let flag = 0b0000_0001
 			while(b < this.length && flag <= 0b1000_0000) {
 				let bit = octet & flag
@@ -23,21 +23,21 @@ export default class BitArray {
 	}
 
 	set(index, value) {
-		const byte_index = BitArray.bit_to_byte_index(index)
-		let octet = this.bits[byte_index]
+		const byte_index = BitArray.bytes_needed(index + 1) - 1
+		let octet = this.bytes[byte_index]
 		const remainder = index % 8
 		const flag = 0b0000_0001 << remainder
 		if (value)
 			octet = octet | flag
 		else
 			octet = octet ^ flag
-		this.bits[byte_index] = octet
+		this.bytes[byte_index] = octet
 		return this
 	}
 
 	get(index) {
-		const byte_index = BitArray.bit_to_byte_index(index)
-		const octet = this.bits[byte_index]
+		const byte_index = BitArray.bytes_needed(index + 1) - 1
+		const octet = this.bytes[byte_index]
 		const remainder = index % 8
 		const flag = 0b0000_0001 << remainder
 		const bit = octet & flag
@@ -47,18 +47,13 @@ export default class BitArray {
 			return false
 	}
 
-	static bit_to_byte_index(bits) {
+	static bytes_needed(bits) {
 		const remainder = bits % 8
-		let bytes = (bits - remainder) / 8
-		return bytes
-	}
-
-	static number_of_bytes_required(bits) {
-		const remainder = bits % 8
-		let bytes = (bits - remainder) / 8
+		const bytes = (bits - remainder) / 8
 		if (remainder > 0)
-			bytes += 1
-		return bytes
+			return bytes + 1
+		else
+			return bytes
 	}
 }
 
