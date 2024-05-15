@@ -41,8 +41,7 @@ class BitArray {
 			let flag = 0b0000_0001
 			while(b < this.length && flag <= 0b1000_0000) {
 				let bit = octet & flag
-				if (bit > 0)
-					f(bit, b)
+				f(bit > 0, b)
 				flag = flag << 1
 				b += 1
 			}
@@ -91,16 +90,25 @@ class BitArray {
 }
 
 function main() {
-	const screen = new BitArray(20*40)
+	const width = 20
+	const height = 40
+	const screen = new BitArray(width*height)
 
 	const canvas = document.getElementById('game')
 	const context = canvas.getContext('2d')
 
 	screen.set(0, true)
 	screen.set(1, true)
+	screen.set(105, true)
 
-	if (screen.get(0))
-		block(0, 0, 10)(context)
+	const pixels_per_block = 10
+
+	screen.forEach((enabled, index) => {
+		if (!enabled) return
+		const x = index % width
+		const y = (index - x)/width
+		block(x*pixels_per_block, y*pixels_per_block,pixels_per_block)(context)
+	})
 }
 
 window.onload = main
